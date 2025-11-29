@@ -1,25 +1,36 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <title>Editar Usuário</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        form { margin-top: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; max-width: 400px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
 </head>
 <body>
-    <h1>Editar Usuário</h1>
+
+    <h1>✏️ Editar Usuário</h1>
     
-    <form action="/users/update/<%= user._id %>" method="POST">
-        <div>
-            <label>Nome:</label>
-            <input type="text" name="nome_usuario" value="<%= user.nome %>" required>
-        </div>
-        <div>
-            <label>Cargo:</label>
-            <input type="text" name="cargo_usuario" value="<%= user.cargo %>" required>
-        </div>
-        <br>
-        <button type="submit">💾 Salvar Alterações</button>
+    <form action="/update/<%= user._id %>" method="POST">
+
+        <!-- CSRF TOKEN (OBRIGATÓRIO EM ROTAS POST) -->
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label for="nome_usuario">Nome:</label>
+        <input type="text" id="nome_usuario" name="nome_usuario" value="<%= user.nome %>" required>
+
+        <label for="cargo_usuario">Cargo:</label>
+        <input type="text" id="cargo_usuario" name="cargo_usuario" value="<%= user.cargo %>" required>
+
+        <button type="submit">Salvar Alterações</button>
+        <a href="/users" style="margin-left: 10px;">Cancelar</a>
     </form>
-    <br>
-    <a href="/users">Cancelar</a>
+
 </body>
 </html>

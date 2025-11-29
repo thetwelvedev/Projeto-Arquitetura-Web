@@ -1,35 +1,17 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Cadastro de Usuário</title>
-    </head>
-<body>
-    <div class="register-box">
-        <h2>Criar Nova Conta</h2>
+<form action="/register" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
-        <% if (typeof erro !== 'undefined' && erro === 'email_existente') { %>
-            <p style="color: red; font-weight: bold;">Este e-mail já está cadastrado!</p>
-        <% } %>
+    <label for="nome"><b>Nome:</b></label>
+    <input type="text" placeholder="Seu Nome Completo" name="nome" required>
 
-        <form action="/register" method="POST">
-            
-            <label for="nome"><b>Nome:</b></label>
-            <input type="text" placeholder="Seu Nome Completo" name="nome" required>
+    <label for="email"><b>Email:</b></label>
+    <input type="email" placeholder="Seu E-mail" name="email" required>
 
-            <label for="email"><b>Email:</b></label>
-            <input type="email" placeholder="Seu E-mail" name="email" required>
+    <label for="cargo"><b>Cargo:</b></label>
+    <input type="text" placeholder="Seu Cargo/Função" name="cargo" required>
 
-            <label for="cargo"><b>Cargo:</b></label>
-            <input type="text" placeholder="Seu Cargo/Função" name="cargo" required>
+    <label for="senha"><b>Senha:</b></label>
+    <input type="password" placeholder="Crie uma Senha Segura" name="senha" required>
 
-            <label for="senha"><b>Senha:</b></label>
-            <input type="password" placeholder="Crie uma Senha Segura" name="senha" required>
-            
-            <button type="submit">Cadastrar</button>
-        </form>
-
-        <p><a href="/login">Já tenho cadastro. Fazer Login.</a></p>
-    </div>
-</body>
-</html>
+    <button type="submit">Cadastrar</button>
+</form>

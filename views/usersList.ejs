@@ -1,49 +1,50 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Usuários (Área Protegida)</title>
+    <title>Lista de Usuários</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
-        .logout-link { text-decoration: none; color: #dc3545; font-weight: bold; padding: 8px 15px; border: 1px solid #dc3545; border-radius: 4px; transition: background-color 0.3s; }
-        .logout-link:hover { background-color: #dc3545; color: white; }
-        h1 { margin: 0; }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .welcome { font-weight: bold; margin-bottom: 15px; color: green; }
+        .action-links a { margin-right: 10px; text-decoration: none; color: #007bff; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Bem-vindo(a), <%= userName %>!</h1> 
-        
-        <a href="/logout" class="logout-link">
-            Sair (Logout)
-        </a>
-    </header>
+    <div class="welcome">Bem-vindo(a), <%= userName %>!</div>
 
-    <h2>Gerenciamento de Usuários</h2>
+    <h1>👥 Lista de Usuários</h1>
+    <p><a href="/new" style="color: blue; text-decoration: none;">+ Adicionar Novo Usuário</a></p>
 
-    <p>
-        <a href="/users/new">➕ Adicionar Novo Usuário (Admin)</a>
-    </p>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Cargo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% usuarios.forEach(function(usuario) { %>
+                <tr>
+                    <td><%= usuario._id %></td>
+                    <td><%= usuario.nome %></td>
+                    <td><%= usuario.cargo %></td>
+                    <td class="action-links">
+                        <a href="/edit/<%= usuario._id %>">Editar</a>
 
-    <ul>
-        <% usuarios.forEach(user => { %>
-            <li style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">
-                <strong><%= user.nome %></strong> - <%= user.cargo %>
-                
-                <div style="margin-top: 5px;">
-                    <a href="/users/edit/<%= user._id %>">
-                        <button style="margin-right: 5px;">✏️ Editar</button>
-                    </a>
-
-                    <form action="/users/delete/<%= user._id %>" method="POST" style="display:inline;">
-                        <button type="submit" style="color: red;">🗑️ Excluir</button>
-                    </form>
-                </div>
-            </li>
-        <% }); %>
-    </ul>
-
+                        <form action="/delete/<%= usuario._id %>" method="POST" style="display:inline;">
+                            <button type="submit" style="color: red; background: none; border: none; cursor: pointer; padding: 0;">Deletar</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </body>
 </html>

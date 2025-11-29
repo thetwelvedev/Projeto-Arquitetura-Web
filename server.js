@@ -1,63 +1,78 @@
+require('dotenv').config();
 const express = require('express');
-const session = require('express-session'); 
-const mongoose = require('mongoose'); 
+const session = require('express-session');
+const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const csurf = require('csurf'); // ← Middleware CSRF
 const userController = require('./controllers/userController');
-const isAuth = require('./middleware/auth'); // Importa o segurança
+const isAuth = require('./middleware/auth');
 const authController = require('./controllers/authController');
+
 const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
-// [CRUCIAL] Middleware para ler dados de formulários (req.body)
 app.use(express.urlencoded({ extended: true }));
 
+// --- Proteção de Headers
+app.use(helmet());
 
-// Configuração do Middleware de Sessão
+// --- Sessão
 app.use(session({
-    secret: 'segredo-do-capitao-black', 
-    resave: false, 
-    saveUninitialized: false, 
-    cookie: { secure: false } 
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }
 }));
 
+// --- CSRF (obrigatoriamente após sessão)
+app.use(csurf());
 
-// 2. Conectar ao MongoDB (Substitua pela SUA string de conexão)
-mongoose.connect('mongodb://127.0.0.1:27017/arquiteturaWeb')
-  .then(() => console.log('🔥 Conectado ao MongoDB!'))
+// --- Enviar token CSRF para TODAS as views
+app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken(); // ← agora csrfToken está disponível no EJS
+    next();
+});
+
+// --- Conexão MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('🔥 Conectado ao MongoDB Atlas!'))
   .catch(err => console.error('Erro ao conectar no Mongo:', err));
 
-
-// --- ROTAS PÚBLICAS (LOGIN/LOGOUT/REGISTRO) ---
-
-// Rota de Login (Passa query params de erro/sucesso para a view)
-app.get('/login', (req, res) => {
-    res.render('login', { erro: req.query.erro, sucesso: req.query.sucesso });
+// --- Rate Limiter Login
+const loginLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    message: { error: 'limite_brute_force' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
-app.post('/login', authController.login);
-app.get('/logout', authController.logout);
 
-// Rotas de REGISTRO PÚBLICO
+// --- Rotas Públicas
+app.get('/login', (req, res) => {
+    let mensagemErro = req.query.erro;
+    if (mensagemErro === 'limite_brute_force') {
+        mensagemErro = 'Muitas tentativas de login. Aguarde 1 minuto.';
+    }
+    res.render('login', { erro: mensagemErro, sucesso: req.query.sucesso });
+});
+
+// ❗ LOGIN NÃO TEM CSRF (caso especial)
+app.post('/login', loginLimiter, authController.login);
+
 app.get('/register', authController.getRegisterForm);
+
+// ✔ Register deve ter CSRF
 app.post('/register', authController.registerUser);
 
-
-// --- ROTAS PROTEGIDAS (CRUD) ---
+// --- Rotas Protegidas
 app.get('/', (req, res) => res.redirect('/users'));
-
 app.get('/users', isAuth, userController.getAllUsers);
 app.get('/users/new', isAuth, userController.getNewUserForm);
-
-// **Atenção:** A rota antiga de criação (app.post('/users', ...)) foi removida ou adaptada
-// para evitar o TypeError, pois a criação pública está em /register.
-// Se precisar de criação por Admin, mapeie para uma nova função adminCreateUser.
-
-// Rota para DELETAR
 app.post('/users/delete/:id', isAuth, userController.deleteUser);
-
-// Rotas para EDITAR
 app.get('/users/edit/:id', isAuth, userController.getEditUserForm);
 app.post('/users/update/:id', isAuth, userController.updateUser);
-
 
 app.listen(3000, () => console.log('Servidor rodando na porta 3000'));

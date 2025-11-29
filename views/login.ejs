@@ -132,6 +132,9 @@
                     Usuário não encontrado.
                 <% } else if (erro === 'senha_incorreta') { %>
                     Senha incorreta.
+                <% } else if (erro === 'limite_brute_force') { %>
+                    <!-- CORREÇÃO AQUI: Trata o erro de Rate Limiting -->
+                    Muitas tentativas de login. Por segurança, aguarde 1 minuto para tentar novamente.
                 <% } else { %>
                     Por favor, faça o login para continuar.
                 <% } %>
